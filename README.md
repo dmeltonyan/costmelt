@@ -156,16 +156,43 @@ Your App
 
 - **Python 3.11+** – For backend development
 - **Node.js 18+** – For frontend development
-- **Docker & docker-compose** – For containerized deployment
+- **Docker & docker-compose** – For containerized deployment (optional)
 - **Supabase project** – With URL and service key
 - **API keys** – For at least one LLM provider (OpenAI, Anthropic, Groq, or DeepSeek)
 
-### Clone the Repository
+### Quick Test (5 Minutes)
 
+**Option 1: Docker (Recommended)**
 ```bash
-git clone https://github.com/your-username/costmelt.git
+git clone https://github.com/dmeltonyan/costmelt.git
 cd costmelt
+
+# Set up .env file (see Configuration section)
+docker-compose up --build
+
+# Test the API
+curl http://localhost:8000/health
 ```
+
+**Option 2: Manual Setup**
+```bash
+git clone https://github.com/dmeltonyan/costmelt.git
+cd costmelt
+
+# Backend
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# In another terminal - Dashboard
+cd dashboard
+npm install
+npm run dev
+```
+
+**📖 For detailed testing instructions, see [Local Testing Guide](docs/LOCAL_TESTING.md)**
 
 ### Backend Setup
 
