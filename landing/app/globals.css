@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-[#0B1221] text-white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Custom CSS Variables */
+  :root {
+    --color-primary: #2F6DAB;
+    --color-secondary: #1C3F70;
+    --color-accent: #00E0FF;
+    --color-background: #0B1221;
+  }
+
+  /* Gradient Overlays */
+  .gradient-primary {
+    background: linear-gradient(135deg, #2F6DAB 0%, #1C3F70 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #2F6DAB 0%, #00E0FF 100%);
+  }
+
+  /* Framer Motion Animation Classes */
+  .fade-in {
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth Gradient Movement */
+  .gradient-move {
+    background: linear-gradient(135deg, #2F6DAB 0%, #1C3F70 50%, #00E0FF 100%);
+    background-size: 200% 200%;
+    animation: gradientMove 15s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B1221;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2F6DAB;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1C3F70;
+}

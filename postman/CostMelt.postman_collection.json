@@ -1,0 +1,316 @@
+{
+	"info": {
+		"_postman_id": "costmelt-api-collection",
+		"name": "Cost Melt API",
+		"description": "Complete API collection for Cost Melt - LLM routing, caching, batching, and cost-optimization proxy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "costmelt"
+	},
+	"item": [
+		{
+			"name": "Main",
+			"item": [
+				{
+					"name": "Route Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"Explain binary search algorithm with time complexity.\",\n  \"user_id\": \"demo-user-123\",\n  \"max_output_tokens\": 400\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/route",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"route"
+							]
+						},
+						"description": "Main endpoint for routing LLM requests through Cost Melt's optimization pipeline. Automatically handles compression, caching, routing, and batching."
+					},
+					"response": []
+				}
+			],
+			"description": "Main API endpoints for LLM request routing"
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"stats"
+							]
+						},
+						"description": "Get top-level summary statistics including total requests, tokens, costs, savings, and cache hit rate."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Usage",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/usage",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"usage"
+							]
+						},
+						"description": "Get usage breakdown by model with request counts, tokens, and costs."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cache",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/cache",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"cache"
+							]
+						},
+						"description": "Get cache performance metrics including hits, misses, hit rate, and recent cache hits."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Routing",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/routing",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"routing"
+							]
+						},
+						"description": "Get routing complexity distribution and model distribution breakdown."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daily",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/daily?days=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"daily"
+							],
+							"query": [
+								{
+									"key": "days",
+									"value": "30",
+									"description": "Number of days to look back (default: 30)"
+								}
+							]
+						},
+						"description": "Get daily timeseries metrics for charts including requests, tokens, costs, and savings."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Models",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/models",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"models"
+							]
+						},
+						"description": "Get model usage and cost comparison table with requests, costs, and savings percentages."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Savings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/savings?days=30",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"savings"
+							],
+							"query": [
+								{
+									"key": "days",
+									"value": "30",
+									"description": "Number of days to look back (default: 30)"
+								}
+							]
+						},
+						"description": "Get historical savings over time for graph visualization."
+					},
+					"response": []
+				}
+			],
+			"description": "Dashboard analytics endpoints for monitoring usage, costs, and optimization performance"
+		},
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Health check endpoint to verify API availability."
+					},
+					"response": []
+				}
+			],
+			"description": "Health and status endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Pre-request script (if needed)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script (if needed)"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

@@ -1,0 +1,35 @@
+# Cost Melt Backend Dependencies
+
+# FastAPI and server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Database
+supabase==2.0.0
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# Redis
+redis==5.0.1
+aioredis==2.0.1
+
+# Security
+bcrypt==4.1.1
+
+# LLM Clients
+openai==1.3.0
+anthropic==0.7.0
+groq==0.4.0
+
+# Utilities
+tiktoken==0.5.1
+numpy==1.24.3
+
+# Environment
+python-dotenv==1.0.0
+
+# Logging (built-in, but can add structured logging)
+structlog==23.2.0
+
