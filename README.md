@@ -1,12 +1,16 @@
-# Cost Melt
+# 🚀 Cost Melt
 
-**Melt your AI costs by 40–70% using smart routing, semantic caching, batching, and prompt compression.**
+**Production-ready LLM cost optimization platform that reduces AI token costs by 40–70% through intelligent routing, semantic caching, prompt compression, and micro-batching.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi)](https://fastapi.tiangolo.com)
-[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js)](https://nextjs.org)
-[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase)](https://supabase.com)
-[![Status](https://img.shields.io/badge/Status-Alpha-orange)](https://github.com/your-username/costmelt)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://github.com/dmeltonyan/costmelt)
 
 ---
 
@@ -606,4 +610,19 @@ Cost Melt is open-sourced under the [MIT License](./LICENSE).
 
 ---
 
-**Built with ❤️ by the Cost Melt team**
+---
+
+## 👨‍💻 Author
+
+**David Melton** - Senior AI Infrastructure Engineer
+
+- GitHub: [@dmeltonyan](https://github.com/dmeltonyan)
+- Project: [Cost Melt](https://github.com/dmeltonyan/costmelt)
+
+**Built with ❤️ for the AI developer community**
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
