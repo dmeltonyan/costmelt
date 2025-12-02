@@ -150,6 +150,12 @@ Your App
 
 ---
 
+## 🚀 Quick Start
+
+**New to Cost Melt?** See [START_HERE.md](START_HERE.md) for a complete setup guide.
+
+**Want to test everything?** See [TESTING_GUIDE.md](TESTING_GUIDE.md) for comprehensive testing instructions.
+
 ## Quickstart
 
 ### Prerequisites
