@@ -550,6 +550,21 @@ The dashboard includes several pages:
 
 ---
 
+## Documentation
+
+Complete documentation is available in the `/docs` directory:
+
+- **[Architecture](docs/ARCHITECTURE.md)** - Complete system architecture and design
+- **[PRD](docs/PRD.md)** - Product Requirements Document
+- **[Technical Specs](docs/TECHNICAL_SPECS.md)** - Detailed technical specifications
+- **[Roadmap](docs/ROADMAP.md)** - Implementation roadmap and phases
+- **[Implementation Guide](docs/IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
+- **[API Documentation](docs/API.md)** - Complete API reference
+- **[Security](docs/SECURITY.md)** - Security architecture and best practices
+- **[Deployment](docs/DEPLOYMENT.md)** - Deployment guides for Railway, Render, AWS
+- **[Local Testing](docs/LOCAL_TESTING.md)** - Comprehensive local testing guide
+- **[Benchmarks](docs/BENCHMARKS.md)** - Load testing and benchmarking suite
+
 ## Roadmap
 
 Cost Melt is actively developed with the following features planned:
