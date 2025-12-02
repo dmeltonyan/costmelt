@@ -25,7 +25,8 @@ groq==0.4.0
 
 # Utilities
 tiktoken==0.5.1
-numpy==1.24.3
+numpy>=1.26.0  # Updated for Python 3.12+ compatibility (distutils removed)
+setuptools>=65.0.0  # Provides distutils for older packages
 
 # Environment
 python-dotenv==1.0.0
