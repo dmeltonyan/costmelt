@@ -24,7 +24,7 @@ anthropic==0.7.0
 groq==0.4.0
 
 # Utilities
-tiktoken==0.5.1
+tiktoken>=0.8.0  # Updated for Python 3.12+ with prebuilt wheels (no Rust needed)
 numpy>=1.26.0  # Updated for Python 3.12+ compatibility (distutils removed)
 setuptools>=65.0.0  # Provides distutils for older packages
 
