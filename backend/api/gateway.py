@@ -182,18 +182,18 @@ class LLMOrchestrator:
                 absolute_savings = baseline_cost - actual_cost
                 savings_pct = (absolute_savings / baseline_cost * 100.0) if baseline_cost > 0 else 100.0
                 
-            # Log to Supabase
-            try:
-                await self.supabase_client.insert_request_log(
-                    prompt=raw_prompt,
-                    response=cached_response,
-                    model_used="cache",
-                    tokens_used=tokens_in + tokens_out,
-                    cost=actual_cost,
-                    cache_hit=True,
-                    compressed=False,
-                    user_id=user_id
-                )
+                # Log to Supabase
+                try:
+                    await self.supabase_client.insert_request_log(
+                        prompt=raw_prompt,
+                        response=cached_response,
+                        model_used="cache",
+                        tokens_used=tokens_in + tokens_out,
+                        cost=actual_cost,
+                        cache_hit=True,
+                        compressed=False,
+                        user_id=user_id
+                    )
                 except Exception as e:
                     logger.warning(f"[{request_id}] Failed to log cache hit to Supabase: {e}")
                 
