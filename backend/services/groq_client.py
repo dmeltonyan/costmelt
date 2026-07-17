@@ -4,6 +4,7 @@ Cost Melt - Groq Client
 Unified client for Groq API calls (Llama 3).
 """
 
+import asyncio
 from typing import Dict, Any, Optional
 from groq import Groq
 from utils.logger import setup_logger
@@ -63,13 +64,17 @@ class GroqClient:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
             
-            response = self.client.chat.completions.create(
+            # groq.Groq is a synchronous client; offload to a thread so
+            # this call doesn't block the event loop (see
+            # openai_client.py for the full rationale).
+            response = await asyncio.to_thread(
+                self.client.chat.completions.create,
                 model=actual_model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens
             )
-            
+
             text = response.choices[0].message.content
             tokens_used = response.usage.total_tokens
             

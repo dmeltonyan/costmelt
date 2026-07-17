@@ -4,6 +4,7 @@ Cost Melt - OpenAI Client
 Unified client for OpenAI API calls (GPT-4o, GPT-4o-mini, embeddings).
 """
 
+import asyncio
 from typing import Dict, Any, Optional
 import openai
 from utils.logger import setup_logger
@@ -58,13 +59,18 @@ class OpenAIClient:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
             
-            response = self.client.chat.completions.create(
+            # openai.OpenAI is a synchronous client; calling it directly
+            # from this async function would block the event loop for the
+            # entire request (freezing every other in-flight request on
+            # this worker). asyncio.to_thread offloads it to a thread pool.
+            response = await asyncio.to_thread(
+                self.client.chat.completions.create,
                 model=model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens
             )
-            
+
             text = response.choices[0].message.content
             tokens_used = response.usage.total_tokens
             
@@ -96,11 +102,12 @@ class OpenAIClient:
             raise Exception("OpenAI client not initialized (missing API key)")
         
         try:
-            response = self.client.embeddings.create(
+            response = await asyncio.to_thread(
+                self.client.embeddings.create,
                 model=model,
                 input=text
             )
-            
+
             embedding = response.data[0].embedding
             
             return {

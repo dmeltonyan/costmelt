@@ -4,6 +4,7 @@ Cost Melt - Anthropic Client
 Unified client for Anthropic Claude API calls.
 """
 
+import asyncio
 from typing import Dict, Any, Optional
 import anthropic
 from utils.logger import setup_logger
@@ -60,7 +61,11 @@ class AnthropicClient:
             }
             actual_model = model_map.get(model, model)
             
-            response = self.client.messages.create(
+            # anthropic.Anthropic is a synchronous client; offload to a
+            # thread so this call doesn't block the event loop (see
+            # openai_client.py for the full rationale).
+            response = await asyncio.to_thread(
+                self.client.messages.create,
                 model=actual_model,
                 max_tokens=max_tokens,
                 temperature=temperature,
@@ -69,7 +74,7 @@ class AnthropicClient:
                     {"role": "user", "content": prompt}
                 ]
             )
-            
+
             text = response.content[0].text
             # Anthropic doesn't always return input tokens, estimate
             tokens_used = response.usage.input_tokens + response.usage.output_tokens
