@@ -51,17 +51,15 @@ jest.mock('../lib/api', () => ({
   }))
 }));
 
+// Pages call window.location.reload() from an error-state "retry" button
+// (see e.g. app/page.tsx's onRetry handler), but none of the tests below
+// exercise that path — every mocked API call resolves successfully, so
+// the error branch never renders. Recent jsdom versions make
+// window.location fully non-configurable and non-writable, so attempting
+// to mock .reload() here (even defensively) throws during test setup
+// instead of the render it's meant to protect. Leave it unmocked; add a
+// targeted mock in an individual test if an error-path test is added.
 describe('Dashboard Pages', () => {
-  beforeEach(() => {
-    // Mock window.location
-    Object.defineProperty(window, 'location', {
-      value: {
-        reload: jest.fn()
-      },
-      writable: true
-    });
-  });
-
   describe('Home Page', () => {
     it('renders without crashing', async () => {
       const DashboardPage = (await import('../app/page')).default;

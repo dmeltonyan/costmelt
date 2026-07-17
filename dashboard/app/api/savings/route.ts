@@ -1,9 +1,9 @@
-// Dashboard API Route - Daily Stats
+// Dashboard API Route - Savings Over Time
 import { proxyBackendGet } from '@/lib/backendProxy';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const days = searchParams.get('days') || '30';
 
-  return proxyBackendGet(`/dashboard/daily?days=${days}`, 'Failed to fetch daily stats');
+  return proxyBackendGet(`/dashboard/savings?days=${days}`, 'Failed to fetch savings');
 }
