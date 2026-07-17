@@ -76,14 +76,26 @@ async def health_check():
 
 @app.get("/ready")
 async def readiness_check():
-    """Readiness endpoint for deployment and local startup checks."""
+    """Readiness endpoint for deployment and local startup checks.
+
+    Actually probes each dependency rather than reporting a fixed status —
+    a readiness check that always says "redis: true" is worse than no
+    check at all, since anything polling it (a load balancer, k8s, a
+    deploy script) would treat an unreachable Redis as healthy.
+    """
+    try:
+        await rate_limit_redis.ping()
+        redis_ok = True
+    except Exception:
+        redis_ok = False
+
     return {
         "status": "ready",
         "service": "costmelt-backend",
         "dependencies": {
-            "redis": True,
-            "supabase": False,
-            "openai": False,
+            "redis": redis_ok,
+            "supabase": supabase_client.client is not None,
+            "openai": bool(settings.openai_api_key),
         },
     }
 
