@@ -4,8 +4,8 @@ Cost Melt - Security Module
 Authentication, authorization, and security utilities.
 """
 
-from backend.security.api_key_manager import APIKeyManager
-from backend.security.rbac import (
+from security.api_key_manager import APIKeyManager
+from security.rbac import (
     require_role,
     require_any_role,
     is_admin,

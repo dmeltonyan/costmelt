@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Optional
 import logging
 
-from backend.security.api_key_manager import APIKeyManager
+from security.api_key_manager import APIKeyManager
 
 logger = logging.getLogger(__name__)
 

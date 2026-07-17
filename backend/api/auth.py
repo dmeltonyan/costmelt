@@ -10,8 +10,8 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 import logging
 
-from backend.security.api_key_manager import APIKeyManager
-from backend.security.rbac import require_role, get_user_id
+from security.api_key_manager import APIKeyManager
+from security.rbac import require_role, get_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,9 @@ def get_api_key_manager(request: Request) -> APIKeyManager:
     return request.app.state.api_key_manager
 
 
-def get_rate_limit_middleware(request: Request):
-    """Dependency to get rate limit middleware from app state"""
-    return request.app.state.rate_limit_middleware
+def get_rate_limiter(request: Request):
+    """Dependency to get the shared RateLimiter instance from app state"""
+    return request.app.state.rate_limiter
 
 
 @router.post("/api-keys", response_model=CreateAPIKeyResponse, status_code=status.HTTP_201_CREATED)
@@ -298,26 +298,26 @@ async def rotate_api_key(
 @router.get("/me", response_model=MeResponse)
 async def get_current_user(
     request: Request,
-    rate_limit_middleware = Depends(get_rate_limit_middleware)
+    rate_limiter = Depends(get_rate_limiter)
 ):
     """
     Get current authenticated user information.
-    
+
     Returns user ID, role, project ID, and rate limit status.
     """
     user_id = getattr(request.state, "user_id", None)
     project_id = getattr(request.state, "project_id", None)
     role = getattr(request.state, "role", None)
-    
+
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated"
         )
-    
+
     # Get rate limit status
     try:
-        rate_limit_status = await rate_limit_middleware.get_rate_limit_status(user_id)
+        rate_limit_status = await rate_limiter.get_rate_limit_status(user_id)
     except Exception as e:
         logger.warning(f"Error getting rate limit status: {e}")
         rate_limit_status = {

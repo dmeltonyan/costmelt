@@ -123,11 +123,26 @@ async def test_compress_full_pipeline(prompt_compressor, mock_token_counter):
 @pytest.mark.asyncio
 async def test_llm_compression_used(prompt_compressor, mock_llm_client):
     """Test that LLM compression is used when appropriate"""
-    # Create a longer prompt that would benefit from LLM compression
-    prompt = "Please explain in detail what machine learning is. " * 10
-    
+    # A long prompt with no repeated sentences and no rule-matchable filler
+    # phrases, so rule-based compression can't get anywhere near the 30%
+    # reduction that would make the LLM pass unnecessary (a single repeated
+    # sentence here would get deduplicated by _remove_repeated_instructions
+    # alone and legitimately skip the LLM step).
+    prompt = (
+        "Machine learning is a field of artificial intelligence that enables systems "
+        "to learn patterns from data without being explicitly programmed for every rule. "
+        "Deep learning relies on neural networks with many layers to model complex, "
+        "non-linear relationships between inputs and outputs. "
+        "Reinforcement learning trains an agent to make decisions by rewarding good "
+        "outcomes and penalizing bad ones over repeated interactions with an environment. "
+        "Natural language processing focuses on enabling computers to understand, "
+        "interpret, and generate human language in a way that is both meaningful and useful. "
+        "Computer vision gives machines the ability to interpret and analyze visual "
+        "information captured from images, video, and other sensors."
+    )
+
     result = await prompt_compressor.compress(prompt)
-    
+
     # Should have used LLM if prompt is long enough
     if len(prompt) > 200:  # Threshold for LLM usage
         assert "llm" in result["strategy"] or mock_llm_client.call_count > 0
@@ -227,8 +242,11 @@ async def test_collapse_enumerations(prompt_compressor):
 @pytest.mark.asyncio
 async def test_compress_code_blocks(prompt_compressor, mock_token_counter):
     """Test compression of long code blocks"""
-    # Create a long code block
-    long_code = "def " + "x = 1\n" * 100  # Long code block
+    # Create a code block long enough to clear CODE_BLOCK_TOKEN_THRESHOLD
+    # (200) under the mock's len//4 token estimate: 100 repeats lands
+    # around ~150 estimated tokens, just under the threshold, so nothing
+    # gets compressed. 200 repeats comfortably clears it.
+    long_code = "def " + "x = 1\n" * 200  # Long code block
     prompt = f"Here is some code:\n```python\n{long_code}\n```"
     
     compressed = prompt_compressor._compress_code_blocks(prompt)

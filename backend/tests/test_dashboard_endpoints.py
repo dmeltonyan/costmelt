@@ -72,28 +72,30 @@ class MockCostCalculator:
 
 
 @pytest.fixture
-def mock_supabase():
-    """Fixture for mock Supabase client"""
-    return MockSupabaseClient()
+def mock_supabase(monkeypatch):
+    """Fixture for mock Supabase client, patched into the api.dashboard module.
 
-
-@pytest.fixture
-def mock_cost_calculator():
-    """Fixture for mock cost calculator"""
-    return MockCostCalculator()
-
-
-@pytest.fixture
-def dashboard_router(mock_supabase, mock_cost_calculator):
-    """Fixture for dashboard router with mocks"""
-    from api.dashboard import router, supabase, cost_calculator
-    
-    # Replace with mocks
+    api.dashboard's route handlers read the module-level `supabase` singleton
+    directly rather than taking it as a parameter, so tests must patch that
+    singleton (not just construct a mock) or they end up exercising the real,
+    uninitialized SupabaseClient (client=None) and silently see empty-state
+    responses instead of the mock data.
+    """
     import api.dashboard as dashboard_module
-    dashboard_module.supabase = mock_supabase
-    dashboard_module.cost_calculator = mock_cost_calculator
-    
-    return router
+
+    mock = MockSupabaseClient()
+    monkeypatch.setattr(dashboard_module, "supabase", mock)
+    return mock
+
+
+@pytest.fixture
+def mock_cost_calculator(monkeypatch):
+    """Fixture for mock cost calculator, patched into the api.dashboard module."""
+    import api.dashboard as dashboard_module
+
+    mock = MockCostCalculator()
+    monkeypatch.setattr(dashboard_module, "cost_calculator", mock)
+    return mock
 
 
 @pytest.mark.asyncio

@@ -208,7 +208,35 @@ class OverkillDetector:
             )
             
             # Step 9: Final classification
-            complexity = self._classify(final_score)
+            #
+            # _detect_math, _detect_code (long blocks), and _detect_multistep
+            # (3+ steps) are documented as signals that should "force
+            # complex" on their own, and 2+ complex-keyword matches are
+            # just as unambiguous. But their weights (<=0.4 each) can never
+            # reach the 2.0 threshold through the blended weighted sum alone
+            # — so without an explicit override here, that forcing never
+            # actually happened and the router would rarely if ever pick a
+            # bigger model. Strong single signals (or an unambiguous
+            # complex-leaning embedding) bypass the blend accordingly.
+            force_complex = (
+                math_score >= 1.0
+                or code_score >= 1.0
+                or multistep_score >= 1.0
+                or keyword_score >= 0.8
+            )
+            force_at_least_medium = (
+                code_score >= 0.5
+                or keyword_score > 0
+                or embedding_score >= 0.5
+                or token_score >= 1.0
+            )
+
+            if force_complex:
+                complexity = 2
+            elif force_at_least_medium:
+                complexity = max(self._classify(final_score), 1)
+            else:
+                complexity = self._classify(final_score)
             
             # Log structured data
             logger.info(

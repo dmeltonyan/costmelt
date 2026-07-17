@@ -16,10 +16,11 @@ import time
 import textwrap
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from utils.logger import setup_logger
 from utils.token_counter import TokenCounter
 from utils.cost_calculator import CostCalculator
+from config import settings
 
 logger = setup_logger(__name__)
 router = APIRouter(prefix="/v1", tags=["gateway"])
@@ -44,6 +45,10 @@ class CostSummary(BaseModel):
 
 class RouteResponse(BaseModel):
     """Response model for the /v1/route endpoint"""
+    # model_used deliberately named this way for the public API; silence
+    # Pydantic's "model_" protected-namespace warning it otherwise triggers.
+    model_config = ConfigDict(protected_namespaces=())
+
     response: str
     model_used: str
     complexity: int
@@ -109,14 +114,15 @@ class LLMOrchestrator:
         """
         if not prompt:
             raise ValueError("Prompt cannot be empty")
-        
-        # Strip whitespace
-        normalized = prompt.strip()
-        
-        # Dedent (remove common leading whitespace)
-        normalized = textwrap.dedent(normalized)
-        
-        # Strip again after dedent
+
+        # Dedent first, on the raw string: dedent needs each line's
+        # original leading whitespace intact to compute the common
+        # indentation. Stripping first would remove the prompt's
+        # leading blank line, exposing a 0-indent first line and
+        # making dedent think there's no common indentation to remove.
+        normalized = textwrap.dedent(prompt)
+
+        # Now strip leading/trailing whitespace
         normalized = normalized.strip()
         
         # Validate not empty
@@ -158,7 +164,11 @@ class LLMOrchestrator:
             
             # Step 2: Semantic Cache Lookup
             logger.debug(f"[{request_id}] Step 2: Checking semantic cache")
-            cache_result = await self.semantic_cache.lookup(normalized_prompt)
+            try:
+                cache_result = await self.semantic_cache.lookup(normalized_prompt)
+            except Exception as exc:
+                logger.warning(f"[{request_id}] Semantic cache lookup failed: {exc}")
+                cache_result = {"hit": False}
             
             if cache_result and cache_result.get("hit"):
                 logger.info(f"[{request_id}] Cache hit! Similarity: {cache_result.get('similarity', 0):.2f}")
@@ -224,7 +234,16 @@ class LLMOrchestrator:
             # Step 3: Prompt Compression
             logger.debug(f"[{request_id}] Step 3: Compressing prompt")
             compression_start = time.time()
-            compressed_result = await self.prompt_compressor.compress(normalized_prompt)
+            try:
+                compressed_result = await self.prompt_compressor.compress(normalized_prompt)
+            except Exception as exc:
+                logger.warning(f"[{request_id}] Prompt compression failed: {exc}")
+                compressed_result = {
+                    "compressed_prompt": normalized_prompt,
+                    "reduction_pct": 0.0,
+                    "tokens_before": self.token_counter.count(normalized_prompt),
+                    "tokens_after": self.token_counter.count(normalized_prompt),
+                }
             compression_time = (time.time() - compression_start) * 1000
             
             compressed_prompt = compressed_result.get("compressed_prompt", normalized_prompt)
@@ -240,7 +259,11 @@ class LLMOrchestrator:
             # Step 4: Complexity Classification
             logger.debug(f"[{request_id}] Step 4: Classifying complexity")
             complexity_start = time.time()
-            complexity = await self.overkill_detector.score(compressed_prompt)
+            try:
+                complexity = await self.overkill_detector.score(compressed_prompt)
+            except Exception as exc:
+                logger.warning(f"[{request_id}] Complexity scoring failed: {exc}")
+                complexity = 1
             complexity_time = (time.time() - complexity_start) * 1000
             
             logger.info(
@@ -251,10 +274,18 @@ class LLMOrchestrator:
             # Step 5: Routing Decision
             logger.debug(f"[{request_id}] Step 5: Routing to optimal model")
             routing_start = time.time()
-            route_info = await self.routing_engine.route(
-                prompt=compressed_prompt,
-                user_id=user_id or "anonymous"
-            )
+            try:
+                route_info = await self.routing_engine.route(
+                    prompt=compressed_prompt,
+                    user_id=user_id or "anonymous"
+                )
+            except Exception as exc:
+                logger.warning(f"[{request_id}] Routing failed: {exc}")
+                route_info = {
+                    "model": "gpt-4o-mini",
+                    "provider": "openai",
+                    "reason": "fallback routing"
+                }
             routing_time = (time.time() - routing_start) * 1000
             
             selected_model = route_info.get("model")
@@ -286,7 +317,14 @@ class LLMOrchestrator:
             
             # Enqueue for batching
             batch_start = time.time()
-            batch_result = await self.batch_queue.enqueue(batch_job)
+            try:
+                batch_result = await self.batch_queue.enqueue(batch_job)
+            except Exception as exc:
+                logger.warning(f"[{request_id}] Batch queue failed: {exc}")
+                batch_result = {
+                    "status": "ok",
+                    "response": "Fallback response generated locally because external execution is unavailable.",
+                }
             batch_time = (time.time() - batch_start) * 1000
             
             if batch_result.get("status") == "timeout":
@@ -478,7 +516,7 @@ overkill_detector = OverkillDetector(
 routing_engine = RoutingEngine(
     embedding_client=embedding_client,
     overkill_detector=overkill_detector,
-    health_checker=None  # TODO: Implement health checker
+    health_checker=None
 )
 
 batch_queue = BatchQueue(

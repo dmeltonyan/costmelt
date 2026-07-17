@@ -17,27 +17,34 @@ from api.gateway import (
 
 
 # Mock classes
+#
+# Each public method is an AsyncMock/Mock wired with side_effect=<impl>.
+# This keeps the realistic default behavior (impl) AND still lets tests
+# use `.assert_called()` / reassign `.return_value` — assigning a bare
+# `self.method = AsyncMock()` here would silently shadow the impl below
+# it and swallow real return values, which caused cost math to receive
+# unconfigured Mock objects instead of numbers.
 class MockSemanticCache:
     def __init__(self):
-        self.lookup = AsyncMock()
-        self.store = AsyncMock()
-        self._embed = AsyncMock()
-    
-    async def lookup(self, prompt: str):
+        self.lookup = AsyncMock(side_effect=self._lookup)
+        self.store = AsyncMock(side_effect=self._store)
+        self._embed = AsyncMock(side_effect=self._embed_impl)
+
+    async def _lookup(self, prompt: str):
         return {"hit": False}
-    
-    async def store(self, prompt: str, response: str, embedding: list):
+
+    async def _store(self, prompt: str, response: str, embedding: list):
         pass
-    
-    async def _embed(self, prompt: str):
+
+    async def _embed_impl(self, prompt: str):
         return [0.1] * 1536
 
 
 class MockPromptCompressor:
     def __init__(self):
-        self.compress = AsyncMock()
-    
-    async def compress(self, prompt: str):
+        self.compress = AsyncMock(side_effect=self._compress)
+
+    async def _compress(self, prompt: str):
         return {
             "compressed_prompt": prompt,
             "tokens_before": 100,
@@ -49,17 +56,17 @@ class MockPromptCompressor:
 
 class MockOverkillDetector:
     def __init__(self):
-        self.score = AsyncMock()
-    
-    async def score(self, prompt: str):
+        self.score = AsyncMock(side_effect=self._score)
+
+    async def _score(self, prompt: str):
         return 1
 
 
 class MockRoutingEngine:
     def __init__(self):
-        self.route = AsyncMock()
-    
-    async def route(self, prompt: str, user_id: str):
+        self.route = AsyncMock(side_effect=self._route)
+
+    async def _route(self, prompt: str, user_id: str):
         return {
             "model": "gpt-4o-mini",
             "provider": "openai",
@@ -70,9 +77,9 @@ class MockRoutingEngine:
 
 class MockBatchQueue:
     def __init__(self):
-        self.enqueue = AsyncMock()
-    
-    async def enqueue(self, job: dict):
+        self.enqueue = AsyncMock(side_effect=self._enqueue)
+
+    async def _enqueue(self, job: dict):
         return {
             "status": "ok",
             "response": "This is a test response from the LLM.",
@@ -82,34 +89,34 @@ class MockBatchQueue:
 
 class MockCostCalculator:
     def __init__(self):
-        self.compute_savings = Mock()
-        self.compute_baseline_cost = Mock()
-    
-    def compute_savings(self, model: str, input_tokens: int, output_tokens: int, baseline_model: str = None):
+        self.compute_savings = Mock(side_effect=self._compute_savings)
+        self.compute_baseline_cost = Mock(side_effect=self._compute_baseline_cost)
+
+    def _compute_savings(self, model: str, input_tokens: int, output_tokens: int, baseline_model: str = None):
         return {
             "actual_cost": 0.00028,
             "baseline_cost": 0.00192,
             "absolute_savings": 0.00164,
             "savings_pct": 85.4
         }
-    
-    def compute_baseline_cost(self, input_tokens: int, output_tokens: int, baseline_model: str = None):
+
+    def _compute_baseline_cost(self, input_tokens: int, output_tokens: int, baseline_model: str = None):
         return 0.00192
 
 
 class MockTokenCounter:
     def __init__(self):
-        self.count = Mock()
-    
-    def count(self, text: str):
+        self.count = Mock(side_effect=self._count)
+
+    def _count(self, text: str):
         return len(text.split()) * 2  # Rough estimate
 
 
 class MockSupabaseClient:
     def __init__(self):
-        self.insert_request_log = AsyncMock()
-    
-    async def insert_request_log(self, **kwargs):
+        self.insert_request_log = AsyncMock(side_effect=self._insert_request_log)
+
+    async def _insert_request_log(self, **kwargs):
         return {"id": "test-id"}
 
 

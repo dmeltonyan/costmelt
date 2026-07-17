@@ -15,101 +15,41 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RateLimitMiddleware(BaseHTTPMiddleware):
+class RateLimiter:
     """
-    Rate limiting middleware using Redis token bucket algorithm.
-    
+    Redis token-bucket rate limiter, decoupled from the ASGI middleware
+    lifecycle so it can be instantiated once at startup and shared between
+    the request-blocking middleware and read-only status endpoints (e.g.
+    /auth/me) via app.state, without reaching into Starlette internals.
+
     Rate limits:
     - Default: 60 requests/minute
     - Pro: 600 requests/minute
     - Enterprise: Custom (stored in database)
-    
+
     Uses Redis key: ratelimit:{user_id}
     """
-    
+
     def __init__(
         self,
-        app,
         redis_client,
         default_limit: int = 60,
         window_seconds: int = 60
     ):
         """
-        Initialize rate limit middleware.
-        
         Args:
-            app: FastAPI application
             redis_client: Redis client (aioredis or redis)
             default_limit: Default requests per window (default: 60)
             window_seconds: Time window in seconds (default: 60)
         """
-        super().__init__(app)
         self.redis = redis_client
         self.default_limit = default_limit
         self.window_seconds = window_seconds
-    
-    async def dispatch(self, request: Request, call_next):
-        """
-        Check rate limit before processing request.
-        
-        Args:
-            request: FastAPI request
-            call_next: Next middleware/handler
-        
-        Returns:
-            Response or 429 if rate limited
-        """
-        # Skip rate limiting for public endpoints
-        path = request.url.path
-        public_paths = ["/health", "/docs", "/openapi.json", "/redoc"]
-        
-        if any(path.startswith(public) for public in public_paths):
-            return await call_next(request)
-        
-        # Get user ID from request state (set by auth middleware)
-        user_id = getattr(request.state, "user_id", None)
-        
-        if not user_id:
-            # No user ID means auth middleware didn't run or user is anonymous
-            # For protected routes, this shouldn't happen, but handle gracefully
-            return await call_next(request)
-        
-        # Check rate limit
-        rate_limit_result = await self._check_rate_limit(user_id)
-        
-        if not rate_limit_result["allowed"]:
-            retry_after = rate_limit_result.get("retry_after", self.window_seconds)
-            
-            logger.warning(f"Rate limit exceeded for user {user_id}: {rate_limit_result['remaining']}/{rate_limit_result['limit']}")
-            
-            return JSONResponse(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                content={
-                    "error": "Rate limit exceeded",
-                    "code": 429,
-                    "message": f"Too many requests. Limit: {rate_limit_result['limit']} per {self.window_seconds} seconds",
-                    "retry_after": retry_after,
-                    "limit": rate_limit_result["limit"],
-                    "remaining": rate_limit_result["remaining"]
-                },
-                headers={
-                    "X-RateLimit-Limit": str(rate_limit_result["limit"]),
-                    "X-RateLimit-Remaining": str(rate_limit_result["remaining"]),
-                    "X-RateLimit-Reset": str(rate_limit_result.get("reset_at", int(time.time()) + retry_after)),
-                    "Retry-After": str(retry_after)
-                }
-            )
-        
-        # Rate limit check passed
-        response = await call_next(request)
-        
-        # Add rate limit headers to response
-        response.headers["X-RateLimit-Limit"] = str(rate_limit_result["limit"])
-        response.headers["X-RateLimit-Remaining"] = str(rate_limit_result["remaining"])
-        response.headers["X-RateLimit-Reset"] = str(rate_limit_result.get("reset_at", int(time.time()) + self.window_seconds))
-        
-        return response
-    
+
+    async def check(self, user_id: str) -> dict:
+        """Public entry point used by the middleware. See _check_rate_limit."""
+        return await self._check_rate_limit(user_id)
+
     async def _check_rate_limit(self, user_id: str) -> dict:
         """
         Check rate limit for user using token bucket algorithm.
@@ -237,4 +177,71 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 "remaining": limit,
                 "reset_at": int(time.time()) + self.window_seconds
             }
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """
+    ASGI middleware that enforces the RateLimiter on every request.
+
+    Takes an already-constructed RateLimiter (shared via app.state) instead
+    of building its own, so status endpoints like /auth/me can query the
+    exact same limiter without depending on Starlette's internal
+    middleware-stack representation.
+    """
+
+    def __init__(self, app, limiter: RateLimiter):
+        super().__init__(app)
+        self.limiter = limiter
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        public_paths = ["/health", "/ready", "/docs", "/openapi.json", "/redoc"]
+
+        if any(path.startswith(public) for public in public_paths):
+            return await call_next(request)
+
+        # Get user ID from request state (set by auth middleware)
+        user_id = getattr(request.state, "user_id", None)
+
+        if not user_id:
+            # No user ID means auth middleware didn't run or user is anonymous
+            return await call_next(request)
+
+        rate_limit_result = await self.limiter.check(user_id)
+
+        if not rate_limit_result["allowed"]:
+            retry_after = rate_limit_result.get("retry_after", self.limiter.window_seconds)
+
+            logger.warning(
+                f"Rate limit exceeded for user {user_id}: "
+                f"{rate_limit_result['remaining']}/{rate_limit_result['limit']}"
+            )
+
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={
+                    "error": "Rate limit exceeded",
+                    "code": 429,
+                    "message": f"Too many requests. Limit: {rate_limit_result['limit']} per {self.limiter.window_seconds} seconds",
+                    "retry_after": retry_after,
+                    "limit": rate_limit_result["limit"],
+                    "remaining": rate_limit_result["remaining"]
+                },
+                headers={
+                    "X-RateLimit-Limit": str(rate_limit_result["limit"]),
+                    "X-RateLimit-Remaining": str(rate_limit_result["remaining"]),
+                    "X-RateLimit-Reset": str(rate_limit_result.get("reset_at", int(time.time()) + retry_after)),
+                    "Retry-After": str(retry_after)
+                }
+            )
+
+        response = await call_next(request)
+
+        response.headers["X-RateLimit-Limit"] = str(rate_limit_result["limit"])
+        response.headers["X-RateLimit-Remaining"] = str(rate_limit_result["remaining"])
+        response.headers["X-RateLimit-Reset"] = str(
+            rate_limit_result.get("reset_at", int(time.time()) + self.limiter.window_seconds)
+        )
+
+        return response
 

@@ -6,6 +6,7 @@ Test suite for the production-grade overkill detector.
 
 import pytest
 import asyncio
+import re
 import numpy as np
 from unittest.mock import Mock, AsyncMock
 from typing import List
@@ -53,10 +54,22 @@ class MockTokenCounter:
         """Count tokens (simple approximation: 1 token ≈ 4 chars)"""
         if not text:
             return 0
-        
+
         if text in self.counts:
             return self.counts[text]
-        
+
+        # OverkillDetector._normalize() lowercases and collapses whitespace
+        # before code/pattern detection runs, so an exact-match lookup
+        # against a raw string set via set_count() would miss the
+        # normalized text that actually reaches this method. Fall back to
+        # a whitespace/case-normalized substring match so tests can still
+        # target specific snippets (e.g. code block contents).
+        normalized_text = re.sub(r'\s+', ' ', text).strip().lower()
+        for key, count in self.counts.items():
+            normalized_key = re.sub(r'\s+', ' ', key).strip().lower()
+            if normalized_key and normalized_key in normalized_text:
+                return count
+
         # Simple approximation
         return len(text) // 4
     

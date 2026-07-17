@@ -5,9 +5,8 @@ Usage: python -m workers.batch_worker
 """
 
 import asyncio
-from workers.batch_worker import BatchWorker
+from workers.batch_worker import main
 
 if __name__ == "__main__":
-    worker = BatchWorker()
-    asyncio.run(worker.run())
+    asyncio.run(main())
 
