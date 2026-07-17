@@ -24,7 +24,7 @@ const testimonials = [
     role: 'SaaS CTO',
     company: 'Tech Corp',
     avatar: 'SJ',
-    quote: 'We didn't have to rewrite anything — it just works.',
+    quote: "We didn't have to rewrite anything — it just works.",
     rating: 5,
   },
   {

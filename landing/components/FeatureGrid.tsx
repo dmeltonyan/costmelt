@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import {
   Route,
   Database,
-  Compress,
+  Shrink,
   Layers,
   BarChart3,
   Zap
@@ -31,7 +31,7 @@ const features = [
     color: 'from-[#00E0FF] to-[#2F6DAB]',
   },
   {
-    icon: Compress,
+    icon: Shrink,
     title: 'Prompt Compression',
     description: 'Shrinks prompt tokens 20–50% before sending.',
     color: 'from-[#1C3F70] to-[#2F6DAB]',
