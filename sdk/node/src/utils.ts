@@ -13,8 +13,9 @@ export function calculateBackoffDelay(
   maxDelay: number = 60000
 ): number {
   const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
-  // Add jitter (random factor between 0.5 and 1.5)
-  const jitter = 0.5 + Math.random();
+  // Add jitter (random factor between 0.5 and 1.0, so the result never
+  // exceeds the maxDelay cap above)
+  const jitter = 0.5 + Math.random() * 0.5;
   return delay * jitter;
 }
 

@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "env": {
+    "node": true,
+    "es2020": true
+  },
+  "rules": {
+    // Several dashboard-stat/error-handling signatures intentionally
+    // return/accept loosely-typed JSON (Promise<any>, catch (error: any)).
+    // Flag it for awareness without failing `npm run lint` over it.
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "ignorePatterns": ["dist/", "node_modules/"]
+}

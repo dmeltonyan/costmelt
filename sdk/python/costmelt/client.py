@@ -10,7 +10,6 @@ import random
 from typing import Optional, Dict, Any
 import requests
 from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 from costmelt.types import RouteRequest, RouteResponse
 from costmelt.errors import (
@@ -59,18 +58,15 @@ class CostMeltClient:
         self.timeout = timeout
         self.max_retries = max_retries
         
-        # Create session with retry strategy
+        # Create session. Retries are handled entirely by the manual loop
+        # in _make_request (which needs per-status-code control — e.g. it
+        # must NOT retry 429 the way it retries 5xx/504). Mounting a
+        # urllib3 Retry adapter here too would retry those same status
+        # codes a second, hidden time underneath _make_request, silently
+        # multiplying the actual attempt count and defeating the "don't
+        # retry rate limits" behavior below.
         self.session = requests.Session()
-        
-        # Configure retry strategy
-        retry_strategy = Retry(
-            total=max_retries,
-            backoff_factor=1.0,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["POST", "GET"]
-        )
-        
-        adapter = HTTPAdapter(max_retries=retry_strategy)
+        adapter = HTTPAdapter()
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
         
@@ -249,8 +245,7 @@ class CostMeltClient:
             Various CostMeltError subclasses based on error type
         """
         url = f"{self.base_url}{endpoint}"
-        last_exception = None
-        
+
         for attempt in range(self.max_retries):
             try:
                 if method == "POST":
@@ -334,10 +329,7 @@ class CostMeltClient:
                     continue
                 
                 raise APIConnectionError(f"Unexpected error: {str(e)}", code=0)
-        
-        # Should never reach here
-        if last_exception:
-            raise last_exception
-        
+
+        # Every branch above raises on the final attempt; this is unreachable.
         raise APIConnectionError("Failed to make request after retries", code=0)
 

@@ -44,6 +44,7 @@ export interface ErrorResponse {
   error: string;
   code: number;
   message: string;
+  retry_after?: number;
 }
 
 /**

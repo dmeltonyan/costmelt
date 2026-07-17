@@ -19,7 +19,7 @@ import {
   ValidationError,
   TimeoutError,
 } from "./errors";
-import { calculateBackoffDelay, sleep, isRetryableError, isNetworkError, isErrorResponse } from "./utils";
+import { calculateBackoffDelay, sleep, isNetworkError } from "./utils";
 
 /**
  * Official Node.js/TypeScript client for Cost Melt API.
@@ -275,8 +275,13 @@ export class CostMeltClient {
           throw new NetworkError(`Network error: ${(error as Error).message}`);
         }
 
-        // Other errors
-        if (attempt < this.maxRetries - 1 && isRetryableError(0)) {
+        // Other/unclassified errors — retry up to the configured limit,
+        // same as the network/server-error branches above. (Previously
+        // gated on isRetryableError(0), which is always false since 0
+        // never matches any of that function's retryable status codes,
+        // so this branch silently never retried and always failed on
+        // the first attempt regardless of maxRetries.)
+        if (attempt < this.maxRetries - 1) {
           const delay = calculateBackoffDelay(attempt);
           await sleep(delay);
           continue;
