@@ -1,0 +1,91 @@
+{
+  "name": "costmelt-vscode",
+  "displayName": "Cost Melt",
+  "description": "Ask AI questions from VS Code, routed through your own Cost Melt backend to automatically pick the cheapest capable model.",
+  "version": "0.1.0",
+  "publisher": "local-dev",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dmeltonyan/costmelt",
+    "directory": "vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "costmelt.askAI",
+        "title": "Cost Melt: Ask AI",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "costmelt.setApiKey",
+        "title": "Cost Melt: Set API Key"
+      },
+      {
+        "command": "costmelt.clearApiKey",
+        "title": "Cost Melt: Clear API Key"
+      },
+      {
+        "command": "costmelt.focusChat",
+        "title": "Cost Melt: Open Chat Panel"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "costmelt",
+          "title": "Cost Melt",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "costmelt": [
+        {
+          "type": "webview",
+          "id": "costmelt.chatView",
+          "name": "Chat"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "costmelt.askAI",
+          "group": "9_cutcopypaste",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Cost Melt",
+      "properties": {
+        "costmelt.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL of your Cost Melt backend. Defaults to the local backend running on your own machine."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^5.3.3"
+  }
+}
