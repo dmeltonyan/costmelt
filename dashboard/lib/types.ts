@@ -79,3 +79,45 @@ export interface SavingsResponse {
   savings_over_time: SavingsData[];
 }
 
+export interface APIKeyInfo {
+  id: string;
+  prefix: string;
+  role: 'admin' | 'write' | 'read';
+  status: string;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string | null;
+  project_id: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface ListAPIKeysResponse {
+  keys: APIKeyInfo[];
+  total: number;
+}
+
+export interface CreateAPIKeyRequest {
+  project_id: string;
+  role: 'admin' | 'write' | 'read';
+  expires_at?: string;
+}
+
+export interface CreateAPIKeyResponse {
+  api_key: string;
+  prefix: string;
+  key_id: string;
+  user_id: string;
+  project_id: string;
+  role: string;
+  created_at: string;
+  expires_at: string | null;
+}
+
+export interface RotateAPIKeyResponse {
+  api_key: string;
+  prefix: string;
+  key_id: string;
+  old_key_id: string;
+  created_at: string;
+}
+
