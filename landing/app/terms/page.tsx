@@ -55,7 +55,7 @@ export default function TermsPage() {
               <ul className="text-gray-300 list-disc list-inside space-y-2 mb-4">
                 <li>Use the service for illegal purposes</li>
                 <li>Attempt to reverse engineer or compromise the service</li>
-                <li>Exceed your plan's usage limits without authorization</li>
+                <li>Exceed your plan&apos;s usage limits without authorization</li>
                 <li>Interfere with or disrupt the service</li>
                 <li>Share API keys or credentials with unauthorized parties</li>
               </ul>
@@ -85,7 +85,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-white mb-4">7. Limitation of Liability</h2>
               <p className="text-gray-300 mb-4">
-                Cost Melt is provided "as is" without warranties. We are not liable for:
+                Cost Melt is provided &quot;as is&quot; without warranties. We are not liable for:
               </p>
               <ul className="text-gray-300 list-disc list-inside space-y-2 mb-4">
                 <li>Indirect, incidental, or consequential damages</li>

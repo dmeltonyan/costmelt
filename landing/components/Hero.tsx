@@ -127,12 +127,12 @@ export default function Hero() {
                 <br />
                 {'  '}
                 <span className="text-green-400">api_key</span>=
-                <span className="text-yellow-400">"your-key"</span>
+                <span className="text-yellow-400">&quot;your-key&quot;</span>
                 <br />
                 )
                 <br />
                 <br />
-                <span className="text-gray-500"># That's it! Automatic savings.</span>
+                <span className="text-gray-500"># That&apos;s it! Automatic savings.</span>
               </code>
             </pre>
           </div>
