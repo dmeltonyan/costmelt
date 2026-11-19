@@ -1,6 +1,6 @@
 # 🚀 Cost Melt
 
-**Production-ready LLM cost optimization platform that reduces AI token costs by 40–70% through intelligent routing, semantic caching, prompt compression, and micro-batching.**
+**A drop-in LLM proxy that cuts token spend by routing each request to the cheapest capable model, serving similar prompts from a semantic cache, compressing prompts, and micro-batching requests.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -53,7 +53,7 @@ The project consists of two major components: a **Backend** built with FastAPI, 
 
 - **Semantic Caching** – Uses vector embeddings to identify and reuse answers for semantically similar prompts, dramatically reducing costs for repeated or similar queries. Cache hits return instantly with near-zero cost.
 
-- **Prompt Compression** – Reduces token count by 20–50% by intelligently compressing prompts while preserving meaning and required context. Uses a hybrid approach combining rule-based compression with LLM-based summarization.
+- **Prompt Compression** – Reduces token count by intelligently compressing prompts while preserving meaning and required context. Uses a hybrid approach combining rule-based compression with LLM-based summarization.
 
 - **Micro-Batching** – Groups compatible requests together and sends them as a single batch to LLM providers, reducing per-request overhead and improving throughput while maintaining low latency.
 
@@ -658,19 +658,6 @@ Cost Melt is open-sourced under the [MIT License](./LICENSE).
 
 ---
 
----
+## Author
 
-## 👨‍💻 Author
-
-**David Melton** - Senior AI Infrastructure Engineer
-
-- GitHub: [@dmeltonyan](https://github.com/dmeltonyan)
-- Project: [Cost Melt](https://github.com/dmeltonyan/costmelt)
-
-**Built with ❤️ for the AI developer community**
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Built by **David Meltonyan**, CS @ Sacramento State '26 · [meltonyan.dev](https://meltonyan.dev) · [LinkedIn](https://www.linkedin.com/in/davidmeltonyan)
